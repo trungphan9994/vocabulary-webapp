@@ -8,11 +8,11 @@ body {
 }
 
 .container {
-    width: 100%;
-    max-width: 400px;      /* Kích thước giống màn hình điện thoại */
+    width: 90%;
+    max-width: 400px;
     background-color: #fff;
     margin-top: 20px;
-    border-radius: 16px;    /* Bo tròn như app di động */
+    border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     padding: 16px;
     text-align: center;
@@ -51,4 +51,27 @@ h3 {
     font-size: 18px;
     color: #2196F3;
     margin: 8px 0;
+}
+
+/* Responsive for larger screens */
+@media (min-width: 768px) {
+    .container {
+        max-width: 600px;
+    }
+
+    h1 { font-size: 28px; }
+    h2 { font-size: 24px; }
+    h3 { font-size: 20px; }
+    input, button { font-size: 18px; padding: 12px; }
+}
+
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.button-row button {
+    flex: 1 1 45%;
+    margin: 4px;
 }
