@@ -161,6 +161,9 @@ function App() {
             setStep(2);
             setInputChinese(""); // Reset trường nhập
             setCheckResult(""); // Reset kết quả kiểm tra
+            setShowVietnamese(false); // Reset nút hiển thị nghĩa
+            setCurrentIndex(0); // Quay lại từ đầu danh sách
+            setIsReviewingUnknown(false); // Reset chế độ học lại từ chưa thuộc
         }
     };
 
@@ -256,9 +259,28 @@ function App() {
                             {quizMode === 'en-vi' && (
                                 <div>
                                     <h2 style={{fontSize:28, color:'#333', margin:'16px 0'}}>{currentWord.english}</h2>
-                                    {currentWord.wordType && (
-                                        <div style={{fontSize:16, color:'#795548', marginBottom:8}}>
-                                            <span>Loại từ: {currentWord.wordType}</span>
+                                    {/* Nếu là tiếng Trung thì hiển thị Pinyin ở cột B, ngược lại hiển thị loại từ */}
+                                    {/\u4e00-\u9fff/.test(currentWord.english) ? (
+                                        currentWord.wordType && (
+                                            <div style={{fontSize:16, color:'#795548', marginBottom:8}}>
+                                                <span>Pinyin: {currentWord.wordType}</span>
+                                            </div>
+                                        )
+                                    ) : (
+                                        currentWord.wordType && (
+                                            <div style={{fontSize:16, color:'#795548', marginBottom:8}}>
+                                                <span>Loại từ: {currentWord.wordType}</span>
+                                            </div>
+                                        )
+                                    )}
+                                    {showVietnamese && (
+                                        <div style={{marginTop:8, fontWeight:'bold', color:'#2196F3', fontSize:20}}>
+                                            Nghĩa: {currentWord.vietnamese}
+                                        </div>
+                                    )}
+                                    {showVietnamese && currentWord.example && (
+                                        <div style={{fontSize:16, color:'#607d8b', marginTop:6, fontStyle:'italic'}}>
+                                            Ví dụ: {currentWord.example}
                                         </div>
                                     )}
                                     <div style={{marginTop:12}}>
@@ -283,7 +305,12 @@ function App() {
                             {quizMode === 'vi-en' && (
                                 <div>
                                     <h2 style={{fontSize:22, color:'#2196F3', margin:'10px 0'}}>Dịch nghĩa: {currentWord.vietnamese}</h2>
-                                    {currentWord.example && (
+                                    {showVietnamese && (
+                                        <div style={{marginTop:8, fontWeight:'bold', color:'#2196F3', fontSize:20}}>
+                                            Từ: {currentWord.english}
+                                        </div>
+                                    )}
+                                    {showVietnamese && currentWord.example && (
                                         <div style={{fontSize:16, color:'#607d8b', marginTop:6, fontStyle:'italic'}}>
                                             Ví dụ: {currentWord.example}
                                         </div>
