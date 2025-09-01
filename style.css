@@ -27,6 +27,12 @@ body {
     box-sizing: border-box;
 }
 
+.button-container {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+
 input, button {
     width: 100%;
     padding: 10px;
@@ -47,6 +53,7 @@ button {
 button:hover {
     background-color: #45a049;
 }
+
 
 h1 {
     font-size: 2.1rem;
@@ -76,44 +83,51 @@ h3 {
 /* Responsive for larger screens */
 @media (min-width: 768px) {
     .container {
-        max-width: 600px;
+        max-width: 100vw;
+        width: 100vw;
+        min-width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 
-    h1 { font-size: 28px; }
-    h2 { font-size: 24px; }
-    h3 { font-size: 20px; }
-    input, button { font-size: 18px; padding: 12px; }
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.2rem; }
+    input, button { font-size: 18px; padding: 14px; }
 }
 
 .button-row {
     display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 14px;
     justify-content: center;
+    align-items: center;
     margin: 12px 0;
+    width: 100%;
 }
-
 .button-row button {
     background: #e3f2fd;
     color: #2196F3;
     border: none;
     border-radius: 8px;
-    padding: 12px 20px;
-    font-size: 1.05rem;
+    padding: 14px 20px;
+    font-size: 1.1rem;
     font-weight: 500;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(33,150,243,0.10);
     transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-    min-width: 110px;
+    min-width: 120px;
     word-break: keep-all;
+    width: auto;
 }
-
 .button-row button:hover {
     background: #2196F3;
     color: #fff;
     box-shadow: 0 4px 16px rgba(33,150,243,0.20);
 }
-
 .button-row button:disabled {
     background: #eee;
     color: #aaa;
@@ -122,43 +136,75 @@ h3 {
 
 @media (max-width: 600px) {
     .container {
-        max-width: 99vw;
-        padding: 12px 2vw 20px 2vw;
+        max-width: 100vw;
+        width: 100vw;
+        min-width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
     input, button {
         font-size: 15px;
-        padding: 8px;
+        padding: 10px;
         width: 100%;
         margin: 6px 0;
     }
-    h1 { font-size: 1.3rem; }
-    h2 { font-size: 18px; }
-    h3 { font-size: 16px; }
+    h1 { font-size: 1.1rem; }
+    h2 { font-size: 1rem; }
+    h3 { font-size: 0.95rem; }
     .button-row {
-        flex-direction: column;
-        gap: 4px;
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 8px;
+        width: 100%;
     }
     .button-row button {
-        flex: 1 1 100%;
-        margin: 2px 0;
-        padding: 10px 10px;
-        font-size: 0.98rem;
-        min-width: 90px;
+        margin: 0 !important;
+        padding: 10px 10px !important;
+        font-size: 0.98rem !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    .button-container {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (min-width: 601px) and (max-width: 900px) {
     .container {
-        max-width: 80vw;
-        padding: 12px;
+        max-width: 100vw;
+        width: 100vw;
+        min-width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
     input, button {
-        font-size: 16px;
-        padding: 10px;
+        font-size: 17px;
+        padding: 12px;
     }
-    h1 { font-size: 24px; }
-    h2 { font-size: 20px; }
-    h3 { font-size: 18px; }
+    h1 { font-size: 1.7rem; }
+    h2 { font-size: 1.2rem; }
+    h3 { font-size: 1.05rem; }
+    .button-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 12px;
+        width: 100%;
+    }
+    .button-row button {
+        margin: 0 !important;
+        padding: 14px 14px !important;
+        font-size: 1.1rem !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
 }
 
 /* Panel quản lý link Google Sheet */
@@ -413,7 +459,7 @@ button, .button-row button, .panel-btn {
     cursor: not-allowed;
 }
 @media (max-width: 600px) {
-    .panel-btn-group, .button-row {
+    .panel-btn-group {
         flex-direction: column;
         gap: 10px;
     }
@@ -422,4 +468,18 @@ button, .button-row button, .panel-btn {
         font-size: 0.95rem;
         padding: 10px 12px;
     }
+}
+@media (min-width: 601px) and (max-width: 1024px) {
+  .button-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .button-container {
+    display: flex;
+    justify-content: center; /* căn giữa hàng nút */
+    flex-wrap: nowrap;       /* không xuống dòng */
+    gap: 12px;
+  }
 }
