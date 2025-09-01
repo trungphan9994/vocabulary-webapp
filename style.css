@@ -1,48 +1,83 @@
 body, html {
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow: hidden;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f3f3f3;
+    font-family: Arial, sans-ser@media (max-width: 600px) {
+    .container {
+        width: 100%;
+        min-height: 100vh;
+        margin: 0;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+    input, button {
+        font-size: 16px;
+        padding: 15px;
+        width: calc(100% - 20px);
+        margin: 10px;
+        max-width: none;
+    }
+    input {
+        font-size: 18px;
+        padding: 15px;
+    }round-color: #f3f3f3;
+    min-height: 100vh;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 .container {
     min-height: 100vh;
-    min-width: 100vw;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    max-width: 100%;
     margin: 0;
-    padding: 0;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     background: #fff;
     box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .button-container {
   display: grid;
   gap: 10px;
-  margin: 16px 0;
+  margin: 8px 0;
 }
 
 input, button {
     width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: none;
-    font-size: 16px;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 12px;
+    border: 2px solid #2196F3;
+    font-size: 18px;
     cursor: pointer;
     word-break: break-word;
     overflow-wrap: break-word;
+    background: #fff;
+    color: #333;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    max-width: 800px;
+}
+
+input {
+    box-shadow: 0 2px 8px rgba(33,150,243,0.1);
+}
+
+input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 4px 12px rgba(33,150,243,0.15);
 }
 
 button {
@@ -81,22 +116,23 @@ h3 {
 }
 
 /* Responsive for larger screens */
-@media (min-width: 768px) {
+@media (min-width: 901px) {
     .container {
-        max-width: 100vw;
-        width: 100vw;
-        min-width: 100vw;
-        height: 100vh;
+        width: 100%;
         min-height: 100vh;
         margin: 0;
-        padding: 0;
+        padding: 30px;
         box-sizing: border-box;
     }
 
-    h1 { font-size: 2.2rem; }
-    h2 { font-size: 1.5rem; }
-    h3 { font-size: 1.2rem; }
-    input, button { font-size: 18px; padding: 14px; }
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 2rem; }
+    h3 { font-size: 1.8rem; }
+    input, button { font-size: 20px; padding: 16px; }
+    .vocab-main { font-size: 2.5rem; }
+    .vocab-type { font-size: 1.4rem; }
+    .vocab-meaning { font-size: 1.8rem; }
+    .vocab-example { font-size: 1.3rem; }
 }
 
 .button-row {
@@ -105,8 +141,11 @@ h3 {
     gap: 14px;
     justify-content: center;
     align-items: center;
-    margin: 12px 0;
+    margin: 12px auto;
     width: 100%;
+    max-width: calc(100% - 20px);
+    box-sizing: border-box;
+    flex-wrap: wrap;
 }
 .button-row button {
     background: #e3f2fd;
@@ -136,24 +175,25 @@ h3 {
 
 @media (max-width: 600px) {
     .container {
-        max-width: 100vw;
-        width: 100vw;
-        min-width: 100vw;
-        height: 100vh;
+        width: 100%;
         min-height: 100vh;
         margin: 0;
-        padding: 0;
+        padding: 20px;
         box-sizing: border-box;
     }
     input, button {
-        font-size: 15px;
-        padding: 10px;
+        font-size: 18px;
+        padding: 15px;
         width: 100%;
-        margin: 6px 0;
+        margin: 8px 0;
     }
-    h1 { font-size: 1.1rem; }
-    h2 { font-size: 1rem; }
-    h3 { font-size: 0.95rem; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.8rem; }
+    h3 { font-size: 1.6rem; }
+    .vocab-main { font-size: 2.2rem; line-height: 1.3; }
+    .vocab-type { font-size: 1.5rem; line-height: 1.4; }
+    .vocab-meaning { font-size: 1.8rem; line-height: 1.4; }
+    .vocab-example { font-size: 1.4rem; line-height: 1.5; }
     .button-row {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr);
@@ -163,34 +203,43 @@ h3 {
     }
     .button-row button {
         margin: 0 !important;
-        padding: 10px 10px !important;
-        font-size: 0.98rem !important;
+        padding: 15px 15px !important;
+        font-size: 1.2rem !important;
         min-width: 0 !important;
         width: 100% !important;
+        height: auto !important;
     }
     .button-container {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 }
 
 @media (min-width: 601px) and (max-width: 900px) {
     .container {
-        max-width: 100vw;
-        width: 100vw;
-        min-width: 100vw;
-        height: 100vh;
+        width: 100%;
         min-height: 100vh;
         margin: 0;
-        padding: 0;
+        padding: 20px;
         box-sizing: border-box;
     }
     input, button {
-        font-size: 17px;
-        padding: 12px;
+        font-size: 18px;
+        padding: 15px;
+        width: calc(100% - 40px);
+        margin: 10px 20px;
+        max-width: 700px;
     }
-    h1 { font-size: 1.7rem; }
-    h2 { font-size: 1.2rem; }
-    h3 { font-size: 1.05rem; }
+    input {
+        font-size: 18px;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.6rem; }
+    h3 { font-size: 1.4rem; }
+    .vocab-main { font-size: 2.2rem; }
+    .vocab-type { font-size: 1.3rem; }
+    .vocab-meaning { font-size: 1.6rem; }
+    .vocab-example { font-size: 1.2rem; }
     .button-row {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr);
@@ -346,12 +395,27 @@ h3 {
 }
 @media (max-width: 600px) {
     .link-panel {
-        width: 99vw;
-        left: 0;
-        right: 0;
+        width: calc(100% - 20px);
+        left: 10px;
+        right: 10px;
         top: 48px;
-        padding: 14px 8px 10px 8px;
-        font-size: 15px;
+        padding: 20px 15px;
+        font-size: 16px;
+        margin: 0 auto;
+    }
+    .link-panel input,
+    .link-panel select {
+        padding: 12px;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+    .link-panel button {
+        padding: 12px 20px;
+        font-size: 1.2rem;
+    }
+    .panel-label {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
     }
 }
 
@@ -360,46 +424,52 @@ h3 {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 2px 12px rgba(33,150,243,0.13);
-    padding: 22px 18px;
-    margin-top: 14px;
-    margin-bottom: 10px;
+    padding: 30px 25px;
+    margin: 20px 10px;
     transition: box-shadow 0.2s;
     word-break: break-word;
     overflow-wrap: break-word;
+    width: calc(100% - 20px);
+    max-width: 800px;
+    box-sizing: border-box;
 }
 .vocab-card:hover, .main-card:hover {
     box-shadow: 0 4px 24px rgba(33,150,243,0.20);
 }
 
 .vocab-main {
-    font-size: 2.1rem;
+    font-size: 2.5rem;
     font-weight: 600;
     color: #333;
     margin: 20px 0 10px 0;
     text-align: center;
     word-break: break-word;
+    line-height: 1.3;
 }
 .vocab-type {
-    font-size: 1.15rem;
+    font-size: 1.4rem;
     color: #795548;
     margin-bottom: 10px;
     text-align: center;
+    line-height: 1.4;
 }
 .vocab-meaning {
-    font-size: 1.35rem;
+    font-size: 1.8rem;
     color: #2196F3;
     margin: 14px 0 10px 0;
     text-align: center;
     font-weight: 500;
     word-break: break-word;
+    line-height: 1.4;
 }
 .vocab-example {
-    font-size: 1.05rem;
+    font-size: 1.3rem;
     color: #607d8b;
     margin-top: 8px;
     font-style: italic;
     text-align: center;
     word-break: break-word;
+    line-height: 1.5;
 }
 
 button, .button-row button, .panel-btn {
@@ -464,9 +534,10 @@ button, .button-row button, .panel-btn {
         gap: 10px;
     }
     .panel-btn, .button-row button {
-        min-width: 90px;
-        font-size: 0.95rem;
-        padding: 10px 12px;
+        min-width: 100px;
+        font-size: 1.2rem;
+        padding: 15px 20px;
+        margin-bottom: 10px;
     }
 }
 @media (min-width: 601px) and (max-width: 1024px) {
@@ -477,9 +548,6 @@ button, .button-row button, .panel-btn {
 
 @media (min-width: 1025px) {
   .button-container {
-    display: flex;
-    justify-content: center; /* căn giữa hàng nút */
-    flex-wrap: nowrap;       /* không xuống dòng */
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
   }
 }

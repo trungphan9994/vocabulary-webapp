@@ -28,28 +28,75 @@
             const recognition = new SpeechRecognition();
             recognition.lang = /[\u4e00-\u9fff]/.test(currentWord.english) ? 'zh-CN' : 'en-US';
             recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
+            recognition.maxAlternatives = 3; // Tăng số lượng kết quả thay thế
+            recognition.continuous = false; // Chỉ ghi âm một lần
             setIsRecording(true);
+
+            let hasResult = false; // Biến để theo dõi xem đã có kết quả chưa
+
             recognition.onresult = (event) => {
+                hasResult = true;
                 setIsRecording(false);
-                const transcript = event.results[0][0].transcript.trim().toLowerCase();
-                let target = quizMode === 'en-vi' ? currentWord.english.trim().toLowerCase() : currentWord.english.trim().toLowerCase();
-                // So sánh với từ cần học
-                if (transcript === target) {
+                
+                // Lấy tất cả các kết quả thay thế
+                const results = [];
+                for (let i = 0; i < event.results[0].length; i++) {
+                    results.push(event.results[0][i].transcript.trim().toLowerCase());
+                }
+
+                let target = currentWord.english.trim().toLowerCase();
+                
+                // Kiểm tra xem có kết quả nào khớp không
+                let matched = false;
+                for (let transcript of results) {
+                    if (transcript === target) {
+                        matched = true;
+                        break;
+                    }
+                }
+
+                if (matched) {
                     setRecordResult('✅ Đúng!');
+                    // Có thể thêm âm thanh hoặc hiệu ứng khi đúng
                 } else {
-                    setRecordResult('❌ Sai! Bạn vừa đọc: ' + transcript);
+                    setRecordResult('❌ Sai! Bạn vừa đọc: ' + results[0] + 
+                        (results.length > 1 ? '\nCác phiên bản khác: ' + results.slice(1).join(', ') : ''));
                 }
             };
+
             recognition.onerror = (event) => {
                 setIsRecording(false);
-                setRecordResult('Lỗi ghi âm hoặc không nhận diện được giọng nói!');
+                console.error('Speech recognition error:', event.error);
+                setRecordResult('⚠️ Lỗi: ' + 
+                    (event.error === 'no-speech' ? 'Không nghe thấy giọng nói' :
+                     event.error === 'audio-capture' ? 'Không tìm thấy micro' :
+                     event.error === 'not-allowed' ? 'Vui lòng cho phép quyền sử dụng micro' :
+                     'Không nhận diện được giọng nói'));
             };
+
             recognition.onend = () => {
                 setIsRecording(false);
+                // Nếu kết thúc mà không có kết quả nào, hiển thị thông báo
+                if (!hasResult) {
+                    setRecordResult('⚠️ Không nghe rõ. Vui lòng thử lại và nói to hơn.');
+                }
             };
-            recognition.start();
-            recognitionRef.current = recognition;
+
+            // Timeout sau 5 giây nếu không có kết quả
+            setTimeout(() => {
+                if (isRecording) {
+                    recognition.stop();
+                }
+            }, 5000);
+
+            try {
+                recognition.start();
+                recognitionRef.current = recognition;
+            } catch (error) {
+                console.error('Speech recognition start error:', error);
+                setIsRecording(false);
+                setRecordResult('⚠️ Không thể bắt đầu ghi âm. Vui lòng thử lại.');
+            }
         };
         // ...existing code...
         useEffect(() => {
@@ -59,29 +106,95 @@
                     if (!ctx || !window.Chart) return;
                     const days = [];
                     const counts = [];
+                    const maxCount = [];
+                    let totalWords = 0;
+
                     for (let i = 6; i >= 0; i--) {
                         const d = new Date();
                         d.setDate(d.getDate() - i);
                         const key = 'learnedToday_' + d.toISOString().slice(0, 10);
                         const arr = JSON.parse(localStorage.getItem(key) || '[]');
-                        days.push(d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }));
+                        days.push(d.toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' }));
                         counts.push(arr.length);
+                        totalWords += arr.length;
+                        maxCount.push(vocabList.length);
                     }
+
                     if (window.learnChartInstance) window.learnChartInstance.destroy();
                     window.learnChartInstance = new window.Chart(ctx, {
                         type: 'bar',
                         data: {
                             labels: days,
-                            datasets: [{
-                                label: 'Số từ đã học',
-                                data: counts,
-                                backgroundColor: '#2196F3',
-                            }]
+                            datasets: [
+                                {
+                                    label: 'Số từ đã học',
+                                    data: counts,
+                                    backgroundColor: 'rgba(33,150,243,0.8)',
+                                    borderColor: '#1976d2',
+                                    borderWidth: 1,
+                                    borderRadius: 5,
+                                    barThickness: 20,
+                                },
+                                {
+                                    label: 'Mục tiêu',
+                                    data: maxCount,
+                                    type: 'line',
+                                    borderColor: '#ff9800',
+                                    borderDash: [5, 5],
+                                    fill: false,
+                                    pointStyle: false
+                                }
+                            ]
                         },
                         options: {
                             responsive: true,
-                            plugins: { legend: { display: false } },
-                            scales: { y: { beginAtZero: true, stepSize: 1 } }
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        usePointStyle: true,
+                                        padding: 15,
+                                        font: {
+                                            size: 12
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: 'rgba(255,255,255,0.9)',
+                                    titleColor: '#333',
+                                    bodyColor: '#666',
+                                    borderColor: '#ddd',
+                                    borderWidth: 1,
+                                    padding: 10,
+                                    displayColors: true,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.dataset.label + ': ' + context.parsed.y + ' từ';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        display: true,
+                                        color: 'rgba(0,0,0,0.05)'
+                                    },
+                                    ticks: {
+                                        stepSize: 5
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
                         }
                     });
                 }, 100);
@@ -175,24 +288,83 @@
             setQuizMode(null); // Reset quiz mode mỗi lần load link mới
         }, [sheetLink]);
 
-        const handleNext = () => {
-            setCurrentIndex((prev) => (prev + 1) % currentList.length);
+        const resetWordState = () => {
             setShowVietnamese(false);
             setInputChinese("");
             setCheckResult("");
+            setRecordResult("");
+            // Đảm bảo ghi âm được dừng nếu đang ghi
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.stop();
+                } catch (e) {
+                    console.log("Recognition already stopped");
+                }
+            }
+            setIsRecording(false);
         };
-        const handlePrev = () => { setCurrentIndex((prev) => Math.max(prev - 1, 0)); setShowVietnamese(false); };
+
+        const handleNext = () => {
+            resetWordState();
+            setCurrentIndex((prev) => {
+                const nextIndex = (prev + 1) % currentList.length;
+                // Thêm delay nhỏ để đảm bảo UI được cập nhật
+                setTimeout(() => {
+                    if (currentList[nextIndex]) {
+                        const isChinese = /[\u4e00-\u9fff]/.test(currentList[nextIndex].english);
+                        const text = currentList[nextIndex].english;
+                        // Tự động phát âm từ mới
+                        const utter = new window.SpeechSynthesisUtterance(text);
+                        utter.lang = isChinese ? 'zh-CN' : 'en-US';
+                        window.speechSynthesis.speak(utter);
+                    }
+                }, 100);
+                return nextIndex;
+            });
+        };
+
+        const handlePrev = () => {
+            resetWordState();
+            setCurrentIndex((prev) => {
+                const newIndex = Math.max(prev - 1, 0);
+                // Thêm delay nhỏ để đảm bảo UI được cập nhật
+                setTimeout(() => {
+                    if (currentList[newIndex]) {
+                        const isChinese = /[\u4e00-\u9fff]/.test(currentList[newIndex].english);
+                        const text = currentList[newIndex].english;
+                        // Tự động phát âm từ mới
+                        const utter = new window.SpeechSynthesisUtterance(text);
+                        utter.lang = isChinese ? 'zh-CN' : 'en-US';
+                        window.speechSynthesis.speak(utter);
+                    }
+                }, 100);
+                return newIndex;
+            });
+        };
+
         const handleRepeat = () => {
-        if (!currentList.length) return;
-        const offset = Math.floor(Math.random() * 8) + 3;
-        const insertIndex = Math.min(currentIndex + offset, currentList.length);
-        const newList = [...currentList];
-        newList.splice(insertIndex, 0, currentList[currentIndex]);
-        setVocabList(newList);
-        setCurrentIndex(currentIndex + 1);
-        setShowVietnamese(false);
-        setInputChinese("");
-        setCheckResult("");
+            if (!currentList.length) return;
+            
+            resetWordState();
+            const offset = Math.floor(Math.random() * 8) + 3;
+            const insertIndex = Math.min(currentIndex + offset, currentList.length);
+            const newList = [...currentList];
+            newList.splice(insertIndex, 0, currentList[currentIndex]);
+            setVocabList(newList);
+            
+            setCurrentIndex(currentIndex + 1);
+            
+            // Thêm delay nhỏ để đảm bảo UI được cập nhật
+            setTimeout(() => {
+                if (currentWord) {
+                    const isChinese = /[\u4e00-\u9fff]/.test(currentWord.english);
+                    const text = currentWord.english;
+                    // Tự động phát âm từ mới
+                    const utter = new window.SpeechSynthesisUtterance(text);
+                    utter.lang = isChinese ? 'zh-CN' : 'en-US';
+                    window.speechSynthesis.speak(utter);
+                }
+            }, 100);
         };
 
         const handleUnknown = () => {
@@ -473,6 +645,7 @@
                     )}
                     {step === 3 && quizMode && (
                         <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                             <button
                                 // className="panel-btn" 
                                 style={{
@@ -491,14 +664,21 @@
                             >
                                 ⬅️ Quay lại
                             </button>
-
                             {quizMode && currentList.length > 0 && currentWord && (
                                 <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 16, marginTop: 8, position: 'relative' }}>
                                     {/* Hiển thị tổng số từ cần học ở góc phải */}
                                     <div style={{ position: 'absolute', top: 12, right: 18, fontWeight: 'bold', color: '#555', fontSize: 15 }}>
-                                        Tổng số từ cần học: {currentList.length - learnedToday.length}
+                                        Số từ cần học: {currentList.length - learnedToday.length}
                                         {isReviewingUnknown && <span style={{ color: '#f44336' }}>(Chưa thuộc)</span>}
                                     </div>
+                                    <div style={{ marginTop: 24, textAlign: 'right', fontWeight: 'bold', color: '#555', fontSize: 15 }}>
+                                        Đã học hôm nay: {learnedToday.length}
+                                    </div>
+                                </div>)}
+                            </div>
+
+                            {quizMode && currentList.length > 0 && currentWord && (
+                                <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 16, marginTop: 8, position: 'relative' }}>
                                     {quizMode === 'en-vi' && (
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <h2 style={{ fontSize: 28, color: '#2196F3', margin: '16px 0', textAlign: 'center' }}>{currentWord.english}</h2>
@@ -616,25 +796,100 @@
                                     <div className="button-container">
                                         <button onClick={handlePrev} disabled={currentIndex === 0}>⬅️ Từ trước</button>
                                         <button onClick={handleRepeat}>🔄 Nhắc lại</button>
-                                        <button onClick={handleNext}>Từ tiếp theo ➡️</button>
+                                        <button onClick={handleNext}>Từ tiếp ➡️</button>
                                         <button onClick={handleRecord} disabled={isRecording}>
                                             {isRecording ? 'Đang ghi...' : '🎤 Ghi âm (kiểm tra)'}
                                         </button>
                                         <button onClick={playCorrectPronunciation}>
-                                            🔊 Đọc đúng mẫu
+                                            🔊 Đọc mẫu
                                         </button>
-                                        {isReviewingUnknown && <button onClick={handleBackToAll}>Quay lại tất cả</button>}
                                         {recordResult && <div style={{ marginTop: 8, fontWeight: 'bold', color: recordResult.startsWith('✅') ? '#4CAF50' : '#d32f2f' }}>{recordResult}</div>}
                                     </div>
                                 </div>
                             )}
-                            {/* Hiển thị thống kê số từ đã học trong ngày ở dưới cùng */}
-                            <div style={{ marginTop: 24, textAlign: 'center', fontWeight: 'bold', color: '#2196F3', fontSize: 16 }}>
-                                Đã học hôm nay: {learnedToday.length} từ
-                            </div>
-                            {/* Thống kê dạng biểu đồ cột số từ đã học mỗi ngày */}
-                            <div style={{ marginTop: 24, textAlign: 'center' }}>
-                                <canvas id="learnChart" width="320" height="120"></canvas>
+                            {/* Phần thống kê học tập */}
+                            <div style={{ 
+                                marginTop: 30,
+                                background: '#fff',
+                                borderRadius: 16,
+                                padding: 20,
+                                boxShadow: '0 2px 12px rgba(33,150,243,0.15)',
+                                width: '100%',
+                                maxWidth: 800,
+                                boxSizing: 'border-box'
+                            }}>
+                                <h3 style={{ 
+                                    color: '#1976d2',
+                                    fontSize: '1.4rem',
+                                    marginBottom: 20,
+                                    textAlign: 'center',
+                                    fontWeight: 'bold'
+                                }}>
+                                    📊 Thống kê học tập
+                                </h3>
+                                
+                                {/* Hiển thị số liệu tổng quan */}
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                                    gap: 15,
+                                    marginBottom: 25,
+                                    padding: '0 10px'
+                                }}>
+                                    <div style={{
+                                        background: '#e3f2fd',
+                                        padding: '15px',
+                                        borderRadius: 12,
+                                        textAlign: 'center'
+                                    }}>
+                                        <div style={{ fontSize: '2rem', color: '#2196F3', fontWeight: 'bold' }}>
+                                            {learnedToday.length}
+                                        </div>
+                                        <div style={{ color: '#1976d2', fontSize: '0.9rem' }}>Từ đã học hôm nay</div>
+                                    </div>
+                                    <div style={{
+                                        background: '#e8f5e9',
+                                        padding: '15px',
+                                        borderRadius: 12,
+                                        textAlign: 'center'
+                                    }}>
+                                        <div style={{ fontSize: '2rem', color: '#4caf50', fontWeight: 'bold' }}>
+                                            {vocabList.length}
+                                        </div>
+                                        <div style={{ color: '#2e7d32', fontSize: '0.9rem' }}>Tổng số từ cần học</div>
+                                    </div>
+                                    <div style={{
+                                        background: '#fff3e0',
+                                        padding: '15px',
+                                        borderRadius: 12,
+                                        textAlign: 'center'
+                                    }}>
+                                        <div style={{ fontSize: '2rem', color: '#ff9800', fontWeight: 'bold' }}>
+                                            {unknownWords.length}
+                                        </div>
+                                        <div style={{ color: '#ef6c00', fontSize: '0.9rem' }}>Từ cần ôn tập</div>
+                                    </div>
+                                </div>
+
+                                {/* Biểu đồ thống kê 7 ngày */}
+                                <div style={{ 
+                                    marginTop: 20,
+                                    background: '#fff',
+                                    borderRadius: 12,
+                                    padding: 15,
+                                    boxSizing: 'border-box'
+                                }}>
+                                    <div style={{ 
+                                        fontSize: '1.1rem',
+                                        color: '#1976d2',
+                                        marginBottom: 15,
+                                        fontWeight: 500,
+                                        textAlign: 'center'
+                                    }}>
+                                        Số từ đã học trong 7 ngày qua
+                                    </div>
+                                    <canvas id="learnChart" style={{ width: '100%', height: 200 }}></canvas>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -644,59 +899,4 @@
     }
 
     ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-    // // ...existing code...
-    //     useEffect(() => {
-    //         if (window.Chart && document.getElementById('learnChart') && step === 3 && quizMode) {
-    //             setTimeout(() => {
-    //                 const ctx = document.getElementById('learnChart');
-    //                 if (!ctx || !window.Chart) return;
-    //                 const days = [];
-    //                 const counts = [];
-    //                 for (let i = 6; i >= 0; i--) {
-    //                     const d = new Date();
-    //                     d.setDate(d.getDate() - i);
-    //                     const key = 'learnedToday_' + d.toISOString().slice(0, 10);
-    //                     const arr = JSON.parse(localStorage.getItem(key) || '[]');
-    //                     days.push(d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }));
-    //                     counts.push(arr.length);
-    //                 }
-    //                 if (window.learnChartInstance) window.learnChartInstance.destroy();
-    //                 window.learnChartInstance = new window.Chart(ctx, {
-    //                     type: 'bar',
-    //                     data: {
-    //                         labels: days,
-    //                         datasets: [{
-    //                             label: 'Số từ đã học',
-    //                             data: counts,
-    //                             backgroundColor: '#2196F3',
-    //                         }]
-    //                     },
-    //                     options: {
-    //                         responsive: true,
-    //                         plugins: { legend: { display: false } },
-    //                         scales: { y: { beginAtZero: true, stepSize: 1 } }
-    //                     }
-    //                 });
-    //             }, 100);
-    //         }
-    //     }, [learnedToday, step, quizMode]);
-
-    // // Sửa logic hiển thị ở chế độ vi-en:
-    // // - Khi nhấn Enter, luôn hiển thị nghĩa (từ tiếng Anh/Trung) và ví dụ
-    // // - Khi chuyển sang từ mới, reset showVietnamese về false để chỉ hiển thị phần nhập, không hiển thị nghĩa cho đến khi kiểm tra.
-    // useEffect(() => {
-    //     if (step === 3 && quizMode === 'vi-en') {
-    //         setShowVietnamese(false);
-    //         setCheckResult("");
-    //         setInputChinese("");
-    //     }
-    // }, [currentIndex, quizMode, step]);
-
-    // // Clear input mỗi khi sang từ mới
-    // useEffect(() => {
-    //     if (step === 3 && quizMode && currentWord) {
-    //         setInputChinese("");
-    //         setCheckResult("");
-    //         // Không reset showVietnamese để giữ trạng thái hiển thị nghĩa nếu cần
-    //     }
-    // }, [currentIndex, quizMode, step]);
+    
