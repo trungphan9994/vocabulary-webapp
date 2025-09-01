@@ -1,21 +1,30 @@
+body, html {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f3f3f3;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
 }
 
 .container {
-    max-width: 430px;
-    margin: 32px auto;
-    background: #f5f7fa;
-    border-radius: 18px;
-    box-shadow: 0 4px 24px rgba(33,150,243,0.10);
-    padding: 28px 18px 36px 18px;
-    position: relative;
-    min-height: 80vh;
+    min-height: 100vh;
+    min-width: 100vw;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    box-sizing: border-box;
 }
 
 input, button {
